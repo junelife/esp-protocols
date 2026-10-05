@@ -1443,7 +1443,9 @@ static void esp_websocket_client_task(void *pv)
     }
 
     esp_websocket_client_dispatch_event(client, WEBSOCKET_EVENT_FINISH, NULL, 0);
+    xSemaphoreTakeRecursive(client->lock, portMAX_DELAY);
     esp_transport_close(client->transport);
+    xSemaphoreGiveRecursive(client->lock);
     client->state = WEBSOCKET_STATE_UNKNOW;
     if (client->selected_for_destroying == true) {
         destroy_and_free_resources(client);
